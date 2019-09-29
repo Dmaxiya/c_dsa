@@ -20,10 +20,17 @@ static bool needIncrease(vector vct) {
 // 重新开辟 listsize * 2 个空间，复制原数据
 static void increase(vector vct) {
     vct->totalSize <<= 1;
+    if(vct->totalSize == 0) {
+        vct->totalSize = 1;
+    }
     assert(vct->elem = realloc(vct->elem, vct->totalSize * sizeof(vectorElemType)));
 }
 
-static void vectorAssign(vector vct, int size, vectorElemType e) {}
+static void vectorAssign(vector vct, int n, vectorElemType e) {
+    if(vct->totalSize < n) {
+
+    }
+}
 
 static vectorElemType vectorAt(vector vct, int index) {
     assert(index >= 0);
@@ -154,14 +161,8 @@ static void vectorSwap(vector vct1, vector vct2) {
     swap(&(vct1->elem), &(vct2->elem), sizeof(vectorElemType*));
 }
 
-const int initSize = 1;
-
-vector newVector() {
+static void init() {
     static bool inited = false;
-    vector vct = malloc(sizeof(struct vector));
-    vct->length = 0;
-    vct->totalSize = 1;
-    vct->elem = malloc(sizeof(vectorElemType));
     if(!inited) {
         inited = true;
         Vectors.assign = vectorAssign;
@@ -185,5 +186,11 @@ vector newVector() {
         Vectors.size = vectorSize;
         Vectors.swap = vectorSwap;
     }
+}
+
+vector newVector() {
+    init();
+    vector vct = malloc(sizeof(struct vector));
+    memset(vct, 0, sizeof(struct vector));
     return vct;
 }

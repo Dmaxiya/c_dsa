@@ -37,6 +37,6 @@ struct {
 } Vectors;
 
 // 外部可访问函数
-vector newVector();                                             // 获取一个新的 vector 对象并初始化
+vector newVector(void);                                     // 获取一个新的 vector 对象并初始化
 
 #endif // VECTOR_H_
