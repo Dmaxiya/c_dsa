@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "vector.h"
+#include "dsa_vector.h"
 
 // 临时使用的 swap 函数，不具有可拓展性
 static void swap(void *a, void *b, int size) {
