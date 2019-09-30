@@ -1,7 +1,7 @@
 #ifndef LIST_H_
 #define LIST_H_
 
-#include "bool.h"
+#include "dsa_bool.h"
 
 typedef int LElemType;
 

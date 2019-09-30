@@ -1,7 +1,7 @@
 #ifndef TREE_H_
 #define TREE_H_
 
-#include "bool.h"
+#include "dsa_bool.h"
 
 typedef int TElemType;
 typedef enum {ROOT, LEFT, RIGHT} Locate;

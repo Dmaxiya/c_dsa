@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
-#include <assert.h>
 #include "dsa_vector.h"
 
 // 临时使用的 swap 函数，不具有可拓展性
@@ -13,69 +10,75 @@ static void swap(void *a, void *b, int size) {
 }
 
 // 判断是否需要开辟新空间，在添加新元素之前判断
-static bool needIncrease(vector vct) {
-    return vct->length >= vct->totalSize;
+static bool need_increase(vector vct) {
+    return vct->length >= vct->total_size;
 }
 
 // 重新开辟 listsize * 2 个空间，复制原数据
 static void increase(vector vct) {
-    vct->totalSize <<= 1;
-    if(vct->totalSize == 0) {
-        vct->totalSize = 1;
+    vct->total_size <<= 1;
+    if(vct->total_size == 0) {
+        vct->total_size = 1;
     }
-    assert(vct->elem = realloc(vct->elem, vct->totalSize * sizeof(vectorElemType)));
+    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static void vectorAssign(vector vct, int n, vectorElemType e) {
-    if(vct->totalSize < n) {
-
+static void vector_assign(vector vct, int n, vector_elem_type e) {
+    if(vct->total_size < n) {
+        vct->total_size = n;
+        assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
+    }
+    
+    vct->length = n;
+    for(int i = 0; i < n; ++i) {
+        vct->elem[i] = e;
     }
 }
 
-static vectorElemType vectorAt(vector vct, int index) {
+static vector_elem_type vector_at(vector vct, int index) {
     assert(index >= 0);
     assert(index < vct->length);
 
     return vct->elem[index];
 }
 
-static vectorElemType vectorBack(vector vct) {
+static vector_elem_type vector_back(vector vct) {
     assert(vct->length > 0);
 
     return vct->elem[vct->length - 1];
 }
 
-static int vectorCapacity(vector vct) {
-    return vct->totalSize;
+static int vector_capacity(vector vct) {
+    return vct->total_size;
 }
 
-static void vectorClear(vector vct) {
+static void vector_clear(vector vct) {
     vct->length = 0;
 }
 
-static vector vectorCopy(vector vct) {
+static vector vector_copy(vector vct) {
     vector ret = malloc(sizeof(struct vector));
     ret->length = vct->length;
-    ret->totalSize = vct->totalSize;
-    ret->elem = malloc(sizeof(vectorElemType) * vct->totalSize);
-    memcpy(ret->elem, vct->elem, sizeof(vectorElemType) * vct->length);
+    ret->total_size = vct->total_size;
+    ret->elem = malloc(sizeof(vector_elem_type) * vct->total_size);
+    memcpy(ret->elem, vct->elem, sizeof(vector_elem_type) * vct->length);
     return ret;
 }
 
-static vectorElemType* vectorData(vector vct) {
+static vector_elem_type* vector_data(vector vct) {
     return vct->elem;
 }
 
-static void vectorDestory(vector vct) {
+static void vector_destory(vector vct) {
     free(vct->elem);
     free(vct);
 }
 
-static bool vectorEmpty(vector vct) {
+static bool vector_empty(vector vct) {
     return vct->length == 0;
 }
 
-static void vectorErase(vector vct, int index) {
+static void vector_erase(vector vct, int index) {
     assert(index >= 0);
     assert(index < vct->length);
 
@@ -85,17 +88,17 @@ static void vectorErase(vector vct, int index) {
     --vct->length;
 }
 
-static vectorElemType vectorFront(vector vct) {
+static vector_elem_type vector_front(vector vct) {
     assert(vct->length > 0);
 
     return vct->elem[0];
 }
 
-static void vectorInsert(vector vct, int index, vectorElemType e) {
+static void vector_insert(vector vct, int index, vector_elem_type e) {
     assert(index >= 0);
     assert(index <= vct->length);
 
-    if(needIncrease(vct)) {
+    if(need_increase(vct)) {
         increase(vct);
     }
     for(int i = vct->length; i > index; --i) {
@@ -105,33 +108,33 @@ static void vectorInsert(vector vct, int index, vectorElemType e) {
     ++vct->length;
 }
 
-static void vectorPopBack(vector vct) {
+static void vector_pop_back(vector vct) {
     if(vct->length == 0) {
         return ;
     }
     --vct->length;
 }
 
-static void vectorPushBack(vector vct, vectorElemType e) {
-    vectorInsert(vct, vct->length, e);
+static void vector_push_back(vector vct, vector_elem_type e) {
+    vector_insert(vct, vct->length, e);
 }
 
-static void vectorReserve(vector vct, int n) {
-    if(n <= vct->totalSize) {
+static void vector_reserve(vector vct, int n) {
+    if(n <= vct->total_size) {
         return;
     }
 
-    vct->totalSize = n;
-    assert(vct->elem = realloc(vct->elem, vct->totalSize * sizeof(vectorElemType)));
+    vct->total_size = n;
+    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static void vectorResize(vector vct, int n, vectorElemType e) {
+static void vector_resize(vector vct, int n, vector_elem_type e) {
     if(n <= vct->length) {
         vct->length = n;
     }
-    if(n > vct->totalSize) {
-        vct->totalSize = n;
-        assert(vct->elem = realloc(vct->elem, vct->totalSize * sizeof(vectorElemType)));
+    if(n > vct->total_size) {
+        vct->total_size = n;
+        assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
     }
 
     for(int i = vct->length; i < n; ++i) {
@@ -139,52 +142,52 @@ static void vectorResize(vector vct, int n, vectorElemType e) {
     }
 }
 
-static void vectorSet(vector vct, int index, vectorElemType e) {
+static void vector_set(vector vct, int index, vector_elem_type e) {
     assert(index >= 0);
     assert(index < vct->length);
 
     vct->elem[index] = e;
 }
 
-static void vectorShrinkToFit(vector vct) {
-    vct->totalSize = vct->length;
-    assert(vct->elem = realloc(vct->elem, vct->totalSize * sizeof(vectorElemType)));
+static void vector_shrink_to_fit(vector vct) {
+    vct->total_size = vct->length;
+    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static int vectorSize(vector vct) {
+static int vector_size(vector vct) {
     return vct->length;
 }
 
-static void vectorSwap(vector vct1, vector vct2) {
+static void vector_swap(vector vct1, vector vct2) {
     swap(&(vct1->length), &(vct2->length), sizeof(int));
-    swap(&(vct1->totalSize), &(vct2->totalSize), sizeof(int));
-    swap(&(vct1->elem), &(vct2->elem), sizeof(vectorElemType*));
+    swap(&(vct1->total_size), &(vct2->total_size), sizeof(int));
+    swap(&(vct1->elem), &(vct2->elem), sizeof(vector_elem_type*));
 }
 
 static void init() {
     static bool inited = false;
     if(!inited) {
         inited = true;
-        Vectors.assign = vectorAssign;
-        Vectors.at = vectorAt;
-        Vectors.back = vectorBack;
-        Vectors.capacity = vectorCapacity;
-        Vectors.clear = vectorClear;
-        Vectors.data = vectorData;
-        Vectors.destory = vectorDestory;
-        Vectors.empty = vectorEmpty;
-        Vectors.erase = vectorErase;
-        Vectors.front = vectorFront;
-        Vectors.insert = vectorInsert;
-        Vectors.copy = vectorCopy;
-        Vectors.pop_back = vectorPopBack;
-        Vectors.push_back = vectorPushBack;
-        Vectors.reserve = vectorReserve;
-        Vectors.resize = vectorResize;
-        Vectors.set = vectorSet;
-        Vectors.shrink_to_fit = vectorShrinkToFit;
-        Vectors.size = vectorSize;
-        Vectors.swap = vectorSwap;
+        Vectors.assign = vector_assign;
+        Vectors.at = vector_at;
+        Vectors.back = vector_back;
+        Vectors.capacity = vector_capacity;
+        Vectors.clear = vector_clear;
+        Vectors.data = vector_data;
+        Vectors.destory = vector_destory;
+        Vectors.empty = vector_empty;
+        Vectors.erase = vector_erase;
+        Vectors.front = vector_front;
+        Vectors.insert = vector_insert;
+        Vectors.copy = vector_copy;
+        Vectors.pop_back = vector_pop_back;
+        Vectors.push_back = vector_push_back;
+        Vectors.reserve = vector_reserve;
+        Vectors.resize = vector_resize;
+        Vectors.set = vector_set;
+        Vectors.shrink_to_fit = vector_shrink_to_fit;
+        Vectors.size = vector_size;
+        Vectors.swap = vector_swap;
     }
 }
 

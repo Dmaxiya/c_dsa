@@ -1,7 +1,7 @@
 #ifndef STACK_H_
 #define STACK_H_
 
-#include "bool.h"
+#include "dsa_bool.h"
 
 typedef int SElemType;
 

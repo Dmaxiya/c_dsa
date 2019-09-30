@@ -1,10 +1,10 @@
 #ifndef DATASTRUCTURE_H_
 #define DATASTRUCTURE_H_
 
-#include "vector.h"
-#include "list.h"
-#include "queue.h"
-#include "stack.h"
-#include "tree.h"
+#include "dsa_vector.h"
+#include "dsa_list.h"
+#include "dsa_queue.h"
+#include "dsa_stack.h"
+#include "dsa_tree.h"
 
 #endif // DATASTRUCTURE_H_
