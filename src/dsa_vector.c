@@ -2,11 +2,12 @@
 
 // 临时使用的 swap 函数，不具有可拓展性
 static void swap(void *a, void *b, int size) {
-    void *c = malloc(size);
+    void *c;
+    assert(c = allocate(size));
     memcpy(c, a, size);
     memcpy(a, b, size);
     memcpy(b, c, size);
-    free(c);
+    deallocate(c, size);
 }
 
 // 判断是否需要开辟新空间，在添加新元素之前判断
@@ -16,17 +17,23 @@ static bool need_increase(vector vct) {
 
 // 重新开辟 listsize * 2 个空间，复制原数据
 static void increase(vector vct) {
-    vct->total_size <<= 1;
     if(vct->total_size == 0) {
+        assert(vct->elem = allocate(sizeof(vector_elem_type)));
         vct->total_size = 1;
+    } else {
+        assert(vct->elem = reallocate(vct->elem, vct->total_size * sizeof(vector_elem_type), (vct->total_size << 1) * sizeof(vector_elem_type)));
+        vct->total_size <<= 1;
     }
-    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static void vector_assign(vector vct, int n, vector_elem_type e) {
+static void vector_assign(vector vct, size_t n, vector_elem_type e) {
     if(vct->total_size < n) {
+        if(vct->total_size == 0) {
+            assert(vct->elem = allocate(n * sizeof(vector_elem_type)));
+        } else {
+            assert(vct->elem = reallocate(vct->elem, vct->total_size * sizeof(vector_elem_type), n * sizeof(vector_elem_type)));
+        }
         vct->total_size = n;
-        assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
     }
     
     vct->length = n;
@@ -35,7 +42,7 @@ static void vector_assign(vector vct, int n, vector_elem_type e) {
     }
 }
 
-static vector_elem_type vector_at(vector vct, int index) {
+static vector_elem_type vector_at(vector vct, size_t index) {
     assert(index >= 0);
     assert(index < vct->length);
 
@@ -48,7 +55,7 @@ static vector_elem_type vector_back(vector vct) {
     return vct->elem[vct->length - 1];
 }
 
-static int vector_capacity(vector vct) {
+static size_t vector_capacity(vector vct) {
     return vct->total_size;
 }
 
@@ -57,10 +64,14 @@ static void vector_clear(vector vct) {
 }
 
 static vector vector_copy(vector vct) {
-    vector ret = malloc(sizeof(struct vector));
+    vector ret;
+    assert(ret = allocate(sizeof(struct vector)));
+    
     ret->length = vct->length;
     ret->total_size = vct->total_size;
-    ret->elem = malloc(sizeof(vector_elem_type) * vct->total_size);
+    if(vct->total_size != 0) {
+        assert(ret->elem = allocate(sizeof(vector_elem_type) * vct->total_size));
+    }
     memcpy(ret->elem, vct->elem, sizeof(vector_elem_type) * vct->length);
     return ret;
 }
@@ -70,15 +81,17 @@ static vector_elem_type* vector_data(vector vct) {
 }
 
 static void vector_destory(vector vct) {
-    free(vct->elem);
-    free(vct);
+    if(vct->total_size != 0) {
+        deallocate(vct->elem, vct->total_size * sizeof(vector_elem_type));
+    }
+    deallocate(vct, sizeof(struct vector));
 }
 
 static bool vector_empty(vector vct) {
     return vct->length == 0;
 }
 
-static void vector_erase(vector vct, int index) {
+static void vector_erase(vector vct, size_t index) {
     assert(index >= 0);
     assert(index < vct->length);
 
@@ -94,7 +107,7 @@ static vector_elem_type vector_front(vector vct) {
     return vct->elem[0];
 }
 
-static void vector_insert(vector vct, int index, vector_elem_type e) {
+static void vector_insert(vector vct, size_t index, vector_elem_type e) {
     assert(index >= 0);
     assert(index <= vct->length);
 
@@ -110,7 +123,7 @@ static void vector_insert(vector vct, int index, vector_elem_type e) {
 
 static void vector_pop_back(vector vct) {
     if(vct->length == 0) {
-        return ;
+        return;
     }
     --vct->length;
 }
@@ -119,30 +132,41 @@ static void vector_push_back(vector vct, vector_elem_type e) {
     vector_insert(vct, vct->length, e);
 }
 
-static void vector_reserve(vector vct, int n) {
+static void vector_reserve(vector vct, size_t n) {
     if(n <= vct->total_size) {
         return;
     }
-
+    
+    if(vct->total_size == 0) {
+        assert(vct->elem = allocate(n * sizeof(vector_elem_type)));
+    } else {
+        assert(vct->elem = reallocate(vct->elem, vct->total_size * sizeof(vector_elem_type), n * sizeof(vector_elem_type)));
+    }
     vct->total_size = n;
-    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static void vector_resize(vector vct, int n, vector_elem_type e) {
+static void vector_resize(vector vct, size_t n, vector_elem_type e) {
     if(n <= vct->length) {
         vct->length = n;
+        return;
     }
+    
     if(n > vct->total_size) {
+        if(vct->total_size == 0) {
+            assert(vct->elem = allocate(n * sizeof(vector_elem_type)));
+        } else {
+            assert(vct->elem = reallocate(vct->elem, vct->total_size * sizeof(vector_elem_type), n * sizeof(vector_elem_type)));
+        }
         vct->total_size = n;
-        assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
     }
 
     for(int i = vct->length; i < n; ++i) {
         vct->elem[i] = e;
     }
+    vct->length = n;
 }
 
-static void vector_set(vector vct, int index, vector_elem_type e) {
+static void vector_set(vector vct, size_t index, vector_elem_type e) {
     assert(index >= 0);
     assert(index < vct->length);
 
@@ -150,11 +174,17 @@ static void vector_set(vector vct, int index, vector_elem_type e) {
 }
 
 static void vector_shrink_to_fit(vector vct) {
+    if(vct->total_size == 0 || vct->total_size == vct->length) {
+        return;
+    } else if(vct->length == 0) {
+        deallocate(vct->elem, vct->total_size * sizeof(vector_elem_type));
+    } else {
+        assert(vct->elem = reallocate(vct->elem, vct->total_size * sizeof(vector_elem_type), vct->length * sizeof(vector_elem_type)));
+    }
     vct->total_size = vct->length;
-    assert(vct->elem = realloc(vct->elem, vct->total_size * sizeof(vector_elem_type)));
 }
 
-static int vector_size(vector vct) {
+static size_t vector_size(vector vct) {
     return vct->length;
 }
 
@@ -193,7 +223,8 @@ static void init() {
 
 vector newVector() {
     init();
-    vector vct = malloc(sizeof(struct vector));
+    vector vct;
+    assert(vct = allocate(sizeof(struct vector)));
     memset(vct, 0, sizeof(struct vector));
     return vct;
 }
